@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Persistent Notepad</title>
+  <style>
+    body {
+      font-family: 'Courier New', monospace;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .notepad-container {
+      background-color: #fff;
+      width: 70%;
+      height: 80%;
+      border: 2px solid #ccc;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+    }
+
+    textarea {
+      width: 100%;
+      height: 90%;
+      border: none;
+      resize: none;
+      font-size: 16px;
+      background-color: #f0f0f0;
+      padding: 10px;
+      box-sizing: border-box;
+      outline: none;
+    }
+
+    .status {
+      font-size: 14px;
+      color: #4CAF50;
+      padding-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="notepad-container">
+    <textarea id="notepad" placeholder="Start typing..."></textarea>
+    <div id="status" class="status"></div>
+  </div>
+
+  <script>
+    // Load the saved text from the server when the page loads
+    window.onload = function() {
+      fetch('/load-text')
+        .then(response => response.text())
+        .then(data => {
+          document.getElementById('notepad').value = data;
+        })
+        .catch(err => console.error('Error loading text:', err));
+    };
+
+    // Save the text to the server when there's a change in the textarea
+    document.getElementById('notepad').addEventListener('input', () => {
+      const text = document.getElementById('notepad').value;
+      const status = document.getElementById('status');
+      
+      // Save text to the server
+      fetch('/save-text', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: text }),
+      })
+      .then(response => response.json())
+      .then(data => {
+        status.textContent = 'Text saved successfully!';
+        setTimeout(() => status.textContent = '', 2000);
+      })
+      .catch(err => console.error('Error saving text:', err));
+    });
+  </script>
+
+</body>
+</html>
